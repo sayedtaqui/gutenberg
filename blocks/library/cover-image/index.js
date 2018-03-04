@@ -1,12 +1,7 @@
 /**
- * External dependencies
- */
-import { isEmpty } from 'lodash';
-
-/**
  * WordPress dependencies
  */
-import { IconButton, PanelBody, RangeControl, ToggleControl, Toolbar } from '@wordpress/components';
+import { IconButton, RangeControl, ToggleControl, Toolbar } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 
@@ -16,31 +11,17 @@ import classnames from 'classnames';
 import './editor.scss';
 import './style.scss';
 import { createBlock } from '../../api';
-import RichText from '../../rich-text';
-import AlignmentToolbar from '../../alignment-toolbar';
 import MediaUpload from '../../media-upload';
 import ImagePlaceholder from '../../image-placeholder';
 import BlockControls from '../../block-controls';
-import BlockAlignmentToolbar from '../../block-alignment-toolbar';
 import InspectorControls from '../../inspector-controls';
+import InnerBlocks from '../../inner-blocks';
 
 const validAlignments = [ 'left', 'center', 'right', 'wide', 'full' ];
 
 const blockAttributes = {
-	title: {
-		type: 'array',
-		source: 'children',
-		selector: 'p',
-	},
 	url: {
 		type: 'string',
-	},
-	align: {
-		type: 'string',
-	},
-	contentAlign: {
-		type: 'string',
-		default: 'center',
 	},
 	id: {
 		type: 'number',
@@ -97,8 +78,7 @@ export const settings = {
 	},
 
 	edit( { attributes, setAttributes, isSelected, className } ) {
-		const { url, title, align, contentAlign, id, hasParallax, dimRatio } = attributes;
-		const updateAlignment = ( nextAlign ) => setAttributes( { align: nextAlign } );
+		const { url, id, hasParallax, dimRatio } = attributes;
 		const onSelectImage = ( media ) => setAttributes( { url: media.url, id: media.id } );
 		const toggleParallax = () => setAttributes( { hasParallax: ! hasParallax } );
 		const setDimRatio = ( ratio ) => setAttributes( { dimRatio: ratio } );
@@ -106,7 +86,6 @@ export const settings = {
 		const style = backgroundImageStyles( url );
 		const classes = classnames(
 			className,
-			contentAlign !== 'center' && `has-${ contentAlign }-content`,
 			dimRatioToClass( dimRatio ),
 			{
 				'has-background-dim': dimRatio !== 0,
@@ -114,22 +93,8 @@ export const settings = {
 			}
 		);
 
-		const alignmentToolbar	= (
-			<AlignmentToolbar
-				value={ contentAlign }
-				onChange={ ( nextAlign ) => {
-					setAttributes( { contentAlign: nextAlign } );
-				} }
-			/>
-		);
 		const controls = isSelected && [
 			<BlockControls key="controls">
-				<BlockAlignmentToolbar
-					value={ align }
-					onChange={ updateAlignment }
-				/>
-
-				{ alignmentToolbar }
 				<Toolbar>
 					<MediaUpload
 						onSelect={ onSelectImage }
@@ -161,24 +126,12 @@ export const settings = {
 					max={ 100 }
 					step={ 10 }
 				/>
-				<PanelBody title={ __( 'Text Alignment' ) }>
-					{ alignmentToolbar }
-				</PanelBody>
 			</InspectorControls>,
 		];
 
 		if ( ! url ) {
-			const hasTitle = ! isEmpty( title );
-			const icon = hasTitle ? undefined : 'format-image';
-			const label = hasTitle ? (
-				<RichText
-					tagName="h2"
-					value={ title }
-					onChange={ ( value ) => setAttributes( { title: value } ) }
-					isSelected={ isSelected }
-					inlineToolbar
-				/>
-			) : __( 'Cover Image' );
+			const icon = 'format-image';
+			const label = __( 'Cover Image' );
 
 			return [
 				controls,
@@ -196,23 +149,25 @@ export const settings = {
 				style={ style }
 				className={ classes }
 			>
-				{ title || isSelected ? (
-					<RichText
-						tagName="p"
-						className="wp-block-cover-image-text"
-						placeholder={ __( 'Write title…' ) }
-						value={ title }
-						onChange={ ( value ) => setAttributes( { title: value } ) }
-						isSelected={ isSelected }
-						inlineToolbar
+				<div className="wp-block-cover-image__inner-container">
+					<InnerBlocks
+						template={ [
+							[ 'core/paragraph', {
+								align: 'center',
+								fontSize: 37,
+								placeholder: 'Write title…',
+								textColor: '#fff',
+							} ],
+						] }
+						allowedBlockNames={ [ 'core/button', 'core/heading', 'core/paragraph', 'core/subhead' ] }
 					/>
-				) : null }
+				</div>
 			</div>,
 		];
 	},
 
 	save( { attributes, className } ) {
-		const { url, title, hasParallax, dimRatio, align, contentAlign } = attributes;
+		const { url, hasParallax, dimRatio, align, contentAlign } = attributes;
 		const style = backgroundImageStyles( url );
 		const classes = classnames(
 			className,
@@ -227,9 +182,9 @@ export const settings = {
 
 		return (
 			<div className={ classes } style={ style }>
-				{ title && title.length > 0 && (
-					<p className="wp-block-cover-image-text">{ title }</p>
-				) }
+				<div className="wp-block-cover-image__inner-container">
+					<InnerBlocks.Content />
+				</div>
 			</div>
 		);
 	},

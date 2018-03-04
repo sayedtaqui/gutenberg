@@ -24,7 +24,6 @@ import {
 	TabbableContainer,
 	withInstanceId,
 	withSpokenMessages,
-	withContext,
 } from '@wordpress/components';
 import { getCategories, isReusableBlock } from '@wordpress/blocks';
 import { keycodes } from '@wordpress/utils';
@@ -340,18 +339,11 @@ export class InserterMenu extends Component {
 }
 
 export default compose(
-	withContext( 'editor' )( ( settings ) => {
-		const { blockTypes } = settings;
-
-		return {
-			enabledBlockTypes: blockTypes,
-		};
-	} ),
 	connect(
 		( state, ownProps ) => {
 			return {
-				items: getInserterItems( state, ownProps.enabledBlockTypes ),
-				frecentItems: getFrecentInserterItems( state, ownProps.enabledBlockTypes ),
+				items: getInserterItems( state, ownProps.supportedBlockTypes ),
+				frecentItems: getFrecentInserterItems( state, ownProps.supportedBlockTypes ),
 			};
 		},
 		{ fetchReusableBlocks }
