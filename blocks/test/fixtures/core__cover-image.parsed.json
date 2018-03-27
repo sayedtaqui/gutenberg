@@ -3,7 +3,8 @@
         "blockName": "core/cover-image",
         "attrs": {
             "url": "https://cldup.com/uuUqE_dXzy.jpg",
-            "id": 8398
+            "id": 8398,
+            "dimRatio": 40
         },
         "innerBlocks": [
             {
@@ -12,13 +13,13 @@
                     "align": "center",
                     "placeholder": "Write title…",
                     "textColor": "#fff",
-                    "fontSize": 37
+                    "fontSize": "large"
                 },
                 "innerBlocks": [],
-                "innerHTML": "\n        <p style=\"color:#fff;text-align:center\">Paragraph 1</p>\n        "
+                "innerHTML": "\n\t\t<p style=\"color:#fff;text-align:center\" class=\"is-large-text\">Paragraph 1</p>\n\t\t"
             }
         ],
-        "innerHTML": "\n<div class=\"wp-block-cover-image has-background-dim has-undefined-content\" style=\"background-image:url(https://cldup.com/uuUqE_dXzy.jpg)\">\n    <div class=\"wp-block-cover-image__inner-container\">\n        \n    </div>\n</div>\n"
+        "innerHTML": "\n<div class=\"wp-block-cover-image has-background-dim has-background-dim-40\" style=\"background-image:url(https://cldup.com/uuUqE_dXzy.jpg)\">\n    <div class=\"wp-block-cover-image__inner-container\">\n\t\t\n    </div>\n</div>\n"
     },
     {
         "attrs": {},

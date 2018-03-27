@@ -3,7 +3,7 @@
  */
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { get, isEqual, reduce, size, castArray, first, last, noop } from 'lodash';
+import { get, reduce, size, castArray, first, last, noop } from 'lodash';
 import tinymce from 'tinymce';
 
 /**
@@ -25,7 +25,6 @@ import {
 	getSaveElement,
 	isReusableBlock,
 	isUnmodifiedDefaultBlock,
-	synchronizeBlocksWithTemplate,
 } from '@wordpress/blocks';
 import { withFilters, withContext } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
@@ -57,7 +56,6 @@ import {
 	selectBlock,
 	updateBlockAttributes,
 	toggleSelection,
-	updateBlockListSettings,
 } from '../../store/actions';
 import {
 	getBlock,
@@ -73,7 +71,6 @@ import {
 	isTyping,
 	getBlockMode,
 	getSelectedBlocksInitialCaretPosition,
-	getBlockListSettings,
 } from '../../store/selectors';
 
 const { BACKSPACE, DELETE, ENTER } = keycodes;
@@ -97,8 +94,6 @@ export class BlockListBlock extends Component {
 		this.onTouchStart = this.onTouchStart.bind( this );
 		this.onClick = this.onClick.bind( this );
 		this.selectOnOpen = this.selectOnOpen.bind( this );
-		this.updateNestingSettingsIfRequired = this.updateNestingSettingsIfRequired.bind( this );
-		this.insertTemplateBlocksIfInnerBlocksEmpty = this.insertTemplateBlocksIfInnerBlocksEmpty.bind( this );
 		this.hadTouchStart = false;
 
 		this.state = {
@@ -120,13 +115,7 @@ export class BlockListBlock extends Component {
 		return {
 			createInnerBlockList: ( uid ) => {
 				const { renderBlockMenu, showContextualToolbar } = this.props;
-				return createInnerBlockList(
-					uid,
-					renderBlockMenu,
-					showContextualToolbar,
-					this.updateNestingSettingsIfRequired,
-					this.insertTemplateBlocksIfInnerBlocksEmpty,
-				);
+				return createInnerBlockList( uid, renderBlockMenu, showContextualToolbar );
 			},
 		};
 	}
@@ -409,19 +398,6 @@ export class BlockListBlock extends Component {
 		}
 	}
 
-	insertTemplateBlocksIfInnerBlocksEmpty( template ) {
-		const { block, onInsertBlocks, uid } = this.props;
-		if ( template && ! block.innerBlocks.length ) {
-			onInsertBlocks( synchronizeBlocksWithTemplate( [], template ), 0, uid );
-		}
-	}
-
-	updateNestingSettingsIfRequired( newSettings ) {
-		if ( ! isEqual( this.props.blockListSettings, newSettings ) ) {
-			this.props.updateNestedSettings( this.props.uid, newSettings );
-		}
-	}
-
 	render() {
 		const {
 			block,
@@ -630,7 +606,6 @@ const mapStateToProps = ( state, { uid, rootUID } ) => {
 		isSelectionEnabled: isSelectionEnabled( state ),
 		initialPosition: getSelectedBlocksInitialCaretPosition( state ),
 		isSelected,
-		blockListSettings: getBlockListSettings( state, uid ),
 	};
 };
 
@@ -643,12 +618,12 @@ const mapDispatchToProps = ( dispatch, ownProps ) => ( {
 		dispatch( selectBlock( uid, initialPosition ) );
 	},
 
-	onInsertBlocks( blocks, index, uid ) {
+	onInsertBlocks( blocks, index ) {
 		const { rootUID, layout } = ownProps;
 
 		blocks = blocks.map( ( block ) => cloneBlock( block, { layout } ) );
 
-		dispatch( insertBlocks( blocks, index, uid || rootUID ) );
+		dispatch( insertBlocks( blocks, index, rootUID ) );
 	},
 
 	onRemove( uid ) {
@@ -675,10 +650,6 @@ const mapDispatchToProps = ( dispatch, ownProps ) => ( {
 
 	toggleSelection( selectionEnabled ) {
 		dispatch( toggleSelection( selectionEnabled ) );
-	},
-
-	updateNestedSettings( uid, settings ) {
-		dispatch( updateBlockListSettings( uid, settings ) );
 	},
 } );
 

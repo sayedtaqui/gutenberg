@@ -14,6 +14,7 @@ import { createBlock } from '../../api';
 import MediaUpload from '../../media-upload';
 import ImagePlaceholder from '../../image-placeholder';
 import BlockControls from '../../block-controls';
+import BlockAlignmentToolbar from '../../block-alignment-toolbar';
 import InspectorControls from '../../inspector-controls';
 import InnerBlocks from '../../inner-blocks';
 
@@ -21,6 +22,9 @@ const validAlignments = [ 'left', 'center', 'right', 'wide', 'full' ];
 
 const blockAttributes = {
 	url: {
+		type: 'string',
+	},
+	align: {
 		type: 'string',
 	},
 	id: {
@@ -78,7 +82,8 @@ export const settings = {
 	},
 
 	edit( { attributes, setAttributes, isSelected, className } ) {
-		const { url, id, hasParallax, dimRatio } = attributes;
+		const { align, url, id, hasParallax, dimRatio } = attributes;
+		const updateAlignment = ( nextAlign ) => setAttributes( { align: nextAlign } );
 		const onSelectImage = ( media ) => setAttributes( { url: media.url, id: media.id } );
 		const toggleParallax = () => setAttributes( { hasParallax: ! hasParallax } );
 		const setDimRatio = ( ratio ) => setAttributes( { dimRatio: ratio } );
@@ -95,6 +100,10 @@ export const settings = {
 
 		const controls = isSelected && [
 			<BlockControls key="controls">
+				<BlockAlignmentToolbar
+					value={ align }
+					onChange={ updateAlignment }
+				/>
 				<Toolbar>
 					<MediaUpload
 						onSelect={ onSelectImage }
@@ -154,12 +163,12 @@ export const settings = {
 						template={ [
 							[ 'core/paragraph', {
 								align: 'center',
-								fontSize: 37,
-								placeholder: 'Write title…',
+								fontSize: 'large',
+								placeholder: __( 'Write title…' ),
 								textColor: '#fff',
 							} ],
 						] }
-						allowedBlockNames={ [ 'core/button', 'core/heading', 'core/paragraph', 'core/subhead' ] }
+						allowedBlocks={ [ 'core/button', 'core/heading', 'core/paragraph', 'core/subhead' ] }
 					/>
 				</div>
 			</div>,
@@ -167,7 +176,7 @@ export const settings = {
 	},
 
 	save( { attributes, className } ) {
-		const { url, hasParallax, dimRatio, align, contentAlign } = attributes;
+		const { url, hasParallax, dimRatio, align } = attributes;
 		const style = backgroundImageStyles( url );
 		const classes = classnames(
 			className,
@@ -175,7 +184,6 @@ export const settings = {
 			{
 				'has-background-dim': dimRatio !== 0,
 				'has-parallax': hasParallax,
-				[ `has-${ contentAlign }-content` ]: contentAlign !== 'center',
 			},
 			align ? `align${ align }` : null,
 		);

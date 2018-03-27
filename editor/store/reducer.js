@@ -976,6 +976,15 @@ export const reusableBlocks = combineReducers( {
 	},
 } );
 
+/**
+ * Reducer that for each block uid stores an object that represents its nested nestings.
+ * E.g: what blocks can be nested inside a block.
+ *
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
+ *
+ * @return {Object} Updated state.
+ */
 export const blockListSettings = ( state = {}, action ) => {
 	switch ( action.type ) {
 		// even if we replace with blocksn with same uid our logic should correct the state
